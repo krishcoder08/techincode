@@ -10,7 +10,14 @@ connectDB();
 
 // Middlewares
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://techincode.vercel.app"
+  ],
+  methods: ["GET","POST","PUT","DELETE"],
+  credentials: true
+}));
 
 // Route Imports
 const authRoutes = require('./routes/authRoutes');
