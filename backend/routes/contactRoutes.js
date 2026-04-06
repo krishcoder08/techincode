@@ -6,17 +6,24 @@ const nodemailer = require('nodemailer');
 router.post('/', async (req, res) => {
   const { name, email, subject, message } = req.body;
 
+  // Create a transporter using Gmail's SMTP server
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,  // Port 587 for TLS (you can try 465 for SSL if needed)
+    secure: false,  // False for TLS (if you're using port 587, secure should be false)
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
+    },
+    tls: {
+      rejectUnauthorized: false  // In case of issues with SSL certificates
     }
   });
 
+  // Mail options with dynamic content
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER,
+    to: process.env.EMAIL_USER, // You can set this to the recipient email
     replyTo: email,
     subject: `📩 Contact Form: ${subject}`,
     html: `
@@ -31,11 +38,13 @@ router.post('/', async (req, res) => {
     `
   };
 
+  // Attempt to send the email and handle success/error
   try {
     await transporter.sendMail(mailOptions);
     res.json({ success: true, message: "Email sent successfully!" });
   } catch (error) {
-    console.error("Mail Error:", error);
+    console.error("Mail Error:", error.message);
+    console.error("Stack Trace:", error.stack);
     res.status(500).json({ success: false, message: "Failed to send email" });
   }
 });
